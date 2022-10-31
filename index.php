@@ -13,9 +13,29 @@ $cons=mysqli_connect($servername,$username,$password,$database);
 if(!$cons){
  die("OOPS ! can't be connected".mysqli_connect_error());
 }
-if($_SERVER['REQUEST_METHOD']=="POST"){
-  $title=$_POST['title'];
-  $description=$_POST['description'];
+
+
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST'){
+  if (isset( $_POST['snoEdit'])){
+    // Update the record
+      $sno = $_POST["snoEdit"];
+      $title = $_POST["titleEdit"];
+      $description = $_POST["descriptionEdit"];
+  
+    // Sql query to be executed
+    $sql = "UPDATE `notes` SET `title` = '$title' , `description` = '$description' WHERE `notes`.`sno` = $sno";
+    $result = mysqli_query($conn, $sql);
+    if($result){
+      $update = true;
+  }
+  else{
+      echo "We could not update the record successfully";
+  }
+  }
+  else{ 
+    $title = $_POST["title"];
+    $description = $_POST["description"];
 
   $sql="INSERT INTO `notes` ( `title`, `description`) VALUES ('$title', '$description')";
   $result=mysqli_query($cons,$sql);
@@ -27,6 +47,7 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
   else{
     echo "The record has not been inserted successfully because of this error --->".mysqli_error($cons);
   }
+}
 }
 
 ?>
@@ -138,6 +159,7 @@ Edit modal
       <div class="container my-3">
            <h2>Add a Note </h2>
         <form action="/CRUD/index.php" method="post">
+          <input type="hidden" name="snoEdit" id="snoEdit">
             <div class="form-group">
               <label for="title">Note Title</label>
               <input type="text" class="form-control" id="title" name="title" aria-describedby="emailHelp">
@@ -152,7 +174,7 @@ Edit modal
                 <br>
               </div>
          
-            <button type="submit" class="btn btn-primary">Add Note</button>
+            <button type="submit" class="btn btn-primary">Update Note</button>
           </form>
       </div>
 
@@ -182,10 +204,10 @@ Edit modal
             <th scope='row'>".$sno."</th>
             <td>".$row['title']."</td>
             <td>".$row['description']."</td>
-            <td> <button class='edit btn btn-sm btn-primary'>Edit</button> <a href='/del'>Delete</a> </td>
+            <td> <button class='edit btn btn-sm btn-primary' id=".$row['sno'].">Edit</button> <a href='/del'>Delete</a> </td>
             </tr>";
           }
-          ?>
+      ?>
     
   </tbody>
   </table>
@@ -193,8 +215,9 @@ Edit modal
       </div>
 
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
-    <script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+ 
+<script>
       edits=document.getElementsByClassName('edit');
       Array.from(edits).forEach((element)=>{
         element.addEventListener("click",(e)=>{
@@ -205,11 +228,13 @@ Edit modal
          console.log(title, description);
          titleEdit.value = title;
          descriptionEdit.value = description;
-         //$('#editModal').modal('toggle');
-       const myModalAlternative = new bootstrap.Modal('#editModal', 'toggle');
+         snoEdit.value = e.target.id;
+         console.log(e.target.id);
+         $('#editModal').modal('toggle');
+      
         })
       })
-    </script>
+</script>
   </body>
 </html>
 
